@@ -19,6 +19,7 @@ class IssueInfo {
     public $companyName;
     public $email;
     public $description;
+    public $closedescription;
     /**
      * @var array
      */
