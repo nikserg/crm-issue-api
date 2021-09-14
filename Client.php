@@ -59,7 +59,7 @@ class Client
      */
     protected function request($method, $endpoint, $options = [])
     {
-        $options[RequestOptions::QUERY]['key'] = $this->apiKey;
+        $options[RequestOptions::QUERY]['apiKey'] = $this->apiKey;
         try {
             $response = $this->guzzle->request($method, "$this->url/gateway/issue/$endpoint", $options);
         } catch (GuzzleException $e) {
@@ -80,15 +80,32 @@ class Client
         }
     }
 
+    /**
+     * @param $type
+     * @param $customerFormId
+     * @param $comment
+     * @return int ID созданной задачи
+     * @throws \nikserg\CRMIssueAPI\exceptions\InvalidRequestException
+     * @throws \nikserg\CRMIssueAPI\exceptions\NotFoundException
+     * @throws \nikserg\CRMIssueAPI\exceptions\ServerException
+     * @throws \nikserg\CRMIssueAPI\exceptions\TransportException
+     */
     public function create($type, $customerFormId, $comment)
     {
         $response = $this->request('GET', 'addIssue', [
             RequestOptions::QUERY => [
                 'type' => $type,
                 'customerFormId' => $customerFormId,
-                'comment' => $comment,
+                'description' => $comment,
             ]
         ]);
-        print_r($response);exit;
+        $json = @json_decode($response->getBody()->getContents(), true);
+        if (!$json || !isset($json['code'])) {
+            throw new TransportException("В ответ получен не json или json имеет неправильный формат ".$response->getBody()->getContents());
+        }
+        if ($json['code'] != 'OK') {
+            throw new ServerException('Не удалось создать задачу: '.$json['message']);
+        }
+        return intval($json['message']);
     }
 }
