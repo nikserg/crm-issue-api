@@ -1,0 +1,20 @@
+{
+    "name": "nikserg/crm-issue-api",
+    "description": "Айтиком CRM API задач",
+    "keywords": [],
+    "authors": [
+        {
+            "name": "Nikita Zarubin",
+            "email": "nikitadimitrov@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "nikserg\\CRMIssueAPI\\": ""
+        }
+    },
+    "require": {
+    },
+    "require-dev": {
+    }
+}
