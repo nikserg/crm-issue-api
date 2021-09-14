@@ -101,6 +101,9 @@ class Client
     }
 
     /**
+     * Создать задачу
+     *
+     *
      * @param $type
      * @param $customerFormId
      * @param $comment
@@ -123,6 +126,17 @@ class Client
         return intval($json);
     }
 
+    /**
+     * Получить информацию о задаче
+     *
+     *
+     * @param $id
+     * @return \nikserg\CRMIssueAPI\models\IssueInfo
+     * @throws \nikserg\CRMIssueAPI\exceptions\InvalidRequestException
+     * @throws \nikserg\CRMIssueAPI\exceptions\NotFoundException
+     * @throws \nikserg\CRMIssueAPI\exceptions\ServerException
+     * @throws \nikserg\CRMIssueAPI\exceptions\TransportException
+     */
     public function getInfo($id)
     {
         $json = $this->parseResponse($this->request('GET', 'issueInfo', [
@@ -134,7 +148,6 @@ class Client
         foreach ($json as  $key => $value) {
             $model->{$key} = $value;
         }
-        print_r($model);
-        exit;
+        return $model;
     }
 }
