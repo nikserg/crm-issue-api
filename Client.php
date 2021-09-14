@@ -9,6 +9,7 @@ use nikserg\CRMIssueAPI\exceptions\InvalidRequestException;
 use nikserg\CRMIssueAPI\exceptions\NotFoundException;
 use nikserg\CRMIssueAPI\exceptions\ServerException;
 use nikserg\CRMIssueAPI\exceptions\TransportException;
+use nikserg\CRMIssueAPI\models\IssueInfo;
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -81,6 +82,25 @@ class Client
     }
 
     /**
+     * @param ResponseInterface $response
+     * @return array
+     * @throws \nikserg\CRMIssueAPI\exceptions\ServerException
+     * @throws \nikserg\CRMIssueAPI\exceptions\TransportException
+     */
+    private function parseResponse($response)
+    {
+        $json = @json_decode($response->getBody()->getContents(), true);
+        if (!$json || !isset($json['code'])) {
+            throw new TransportException("В ответ получен не json или json имеет неправильный формат " . $response->getBody()->getContents());
+        }
+        if ($json['code'] != 'OK') {
+            throw new ServerException('Не удалось выполнить действие: ' . $json['message']);
+        }
+
+        return $json['message'];
+    }
+
+    /**
      * @param $type
      * @param $customerFormId
      * @param $comment
@@ -92,20 +112,29 @@ class Client
      */
     public function create($type, $customerFormId, $comment)
     {
-        $response = $this->request('GET', 'addIssue', [
+        $json = $this->parseResponse($this->request('GET', 'addIssue', [
             RequestOptions::QUERY => [
-                'type' => $type,
+                'type'           => $type,
                 'customerFormId' => $customerFormId,
-                'description' => $comment,
-            ]
-        ]);
-        $json = @json_decode($response->getBody()->getContents(), true);
-        if (!$json || !isset($json['code'])) {
-            throw new TransportException("В ответ получен не json или json имеет неправильный формат ".$response->getBody()->getContents());
+                'description'    => $comment,
+            ],
+        ]));
+
+        return intval($json);
+    }
+
+    public function getInfo($id)
+    {
+        $json = $this->parseResponse($this->request('GET', 'issueInfo', [
+            RequestOptions::QUERY => [
+                'id' => $id,
+            ],
+        ]));
+        $model = new IssueInfo();
+        foreach ($json as  $key => $value) {
+            $model->{$key} = $value;
         }
-        if ($json['code'] != 'OK') {
-            throw new ServerException('Не удалось создать задачу: '.$json['message']);
-        }
-        return intval($json['message']);
+        print_r($model);
+        exit;
     }
 }
