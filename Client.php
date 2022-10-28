@@ -71,21 +71,21 @@ class Client
             case 204:
                 return $response;
             case 400:
-                throw new InvalidRequestException("$endpoint: Неверный формат запроса");
+                throw new InvalidRequestException("$endpoint: Неверный формат запроса " . $response->getBody()->getContents());
             case 404:
-                throw new NotFoundException("$endpoint: Сущность или точка АПИ не найдены");
+                throw new NotFoundException("$endpoint: Сущность или точка АПИ не найдены " . $response->getBody()->getContents());
             case 500:
                 throw new ServerException("$endpoint: Ошибка сервера \n" . $response->getBody()->getContents());
             default:
-                throw new TransportException("$endpoint: Неожиданный код ответа {$response->getStatusCode()}");
+                throw new TransportException("$endpoint: Неожиданный код ответа {$response->getStatusCode()} " . $response->getBody()->getContents());
         }
     }
 
     /**
      * @param ResponseInterface $response
      * @return array
-     * @throws \nikserg\CRMIssueAPI\exceptions\ServerException
-     * @throws \nikserg\CRMIssueAPI\exceptions\TransportException
+     * @throws ServerException
+     * @throws TransportException
      */
     private function parseResponse($response)
     {
@@ -108,10 +108,10 @@ class Client
      * @param $customerFormId
      * @param $comment
      * @return int ID созданной задачи
-     * @throws \nikserg\CRMIssueAPI\exceptions\InvalidRequestException
-     * @throws \nikserg\CRMIssueAPI\exceptions\NotFoundException
-     * @throws \nikserg\CRMIssueAPI\exceptions\ServerException
-     * @throws \nikserg\CRMIssueAPI\exceptions\TransportException
+     * @throws InvalidRequestException
+     * @throws NotFoundException
+     * @throws ServerException
+     * @throws TransportException
      */
     public function create($type, $customerFormId, $comment)
     {
@@ -131,11 +131,11 @@ class Client
      *
      *
      * @param $id
-     * @return \nikserg\CRMIssueAPI\models\IssueInfo
-     * @throws \nikserg\CRMIssueAPI\exceptions\InvalidRequestException
-     * @throws \nikserg\CRMIssueAPI\exceptions\NotFoundException
-     * @throws \nikserg\CRMIssueAPI\exceptions\ServerException
-     * @throws \nikserg\CRMIssueAPI\exceptions\TransportException
+     * @return IssueInfo
+     * @throws InvalidRequestException
+     * @throws NotFoundException
+     * @throws ServerException
+     * @throws TransportException
      */
     public function getInfo($id)
     {
@@ -145,7 +145,7 @@ class Client
             ],
         ]));
         $model = new IssueInfo();
-        foreach ($json as  $key => $value) {
+        foreach ($json as $key => $value) {
             $model->{$key} = $value;
         }
         return $model;
