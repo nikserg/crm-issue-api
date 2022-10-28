@@ -61,8 +61,9 @@ class Client
     protected function request($method, $endpoint, $options = [])
     {
         $options[RequestOptions::QUERY]['apiKey'] = $this->apiKey;
+        $fullUrl = "$this->url/gateway/issue/$endpoint";
         try {
-            $response = $this->guzzle->request($method, "$this->url/gateway/issue/$endpoint", $options);
+            $response = $this->guzzle->request($method, $fullUrl, $options);
         } catch (GuzzleException $e) {
             throw new TransportException("Ошибка запроса; {$e->getMessage()}");
         }
@@ -71,13 +72,13 @@ class Client
             case 204:
                 return $response;
             case 400:
-                throw new InvalidRequestException("$endpoint: Неверный формат запроса " . $response->getBody()->getContents());
+                throw new InvalidRequestException($method . ' ' . $fullUrl . ": Неверный формат запроса " . $response->getBody()->getContents() . ' options: ' . print_r($options, true));
             case 404:
-                throw new NotFoundException("$endpoint: Сущность или точка АПИ не найдены " . $response->getBody()->getContents());
+                throw new NotFoundException($method . ' ' . $fullUrl . ": Сущность или точка АПИ не найдены " . $response->getBody()->getContents() . ' options: ' . print_r($options, true));
             case 500:
-                throw new ServerException("$endpoint: Ошибка сервера \n" . $response->getBody()->getContents());
+                throw new ServerException($method . ' ' . $fullUrl . ": Ошибка сервера \n" . $response->getBody()->getContents() . ' options: ' . print_r($options, true));
             default:
-                throw new TransportException("$endpoint: Неожиданный код ответа {$response->getStatusCode()} " . $response->getBody()->getContents());
+                throw new TransportException($method . ' ' . $fullUrl . ": Неожиданный код ответа {$response->getStatusCode()} " . $response->getBody()->getContents() . ' options: ' . print_r($options, true));
         }
     }
 
